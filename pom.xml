@@ -1,7 +1,6 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
     
     <groupId>com.ac.ems</groupId>
     <artifactId>ac-ems-system-rest</artifactId>
@@ -45,6 +44,7 @@
         
         <spring.test.mvc.version>1.0.0.M2</spring.test.mvc.version>
         <rest-assured.version>2.4.0</rest-assured.version>
+        <json.version>20140107</json.version>
         
         <!--  Plugin Versions  -->
         <clover.version>3.3.0</clover.version>
@@ -87,6 +87,11 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.json</groupId>
+          <artifactId>json</artifactId>
+          <version>${json.version}</version>
         </dependency>
         <!-- Test Dependencies -->
         <dependency>
