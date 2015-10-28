@@ -13,7 +13,7 @@ public class LoginSuccessData extends SimpleMessageData {
   private String userRole;
   
   public LoginSuccessData() {
-    super("Login Succesful", "The Login Validated Successfully.");
+    super("Login Successful", "The Login Validated Successfully.");
     userName = null;
     userID   = 0;
     userRole = null;
