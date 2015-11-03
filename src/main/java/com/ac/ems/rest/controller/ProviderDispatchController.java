@@ -128,6 +128,8 @@ public class ProviderDispatchController {
       if (ambulance == null)
         return new SimpleErrorData("No Ambulance Found", "There was no Ambulance data found with this dispatchID");
       
+      EMSProvider provider = (EMSProvider)database.querySingleRow(EMSDatabase.EMS_PROVIDER_TABLE_NAME, "providerID", detail.getProviderID());
+      
       //Now that we have the key pieces, let's start to assemble the new event
       DispatchEvent event  = new DispatchEvent();
       DispatchEventLog log = new DispatchEventLog();
@@ -147,9 +149,18 @@ public class ProviderDispatchController {
       event.setEventID(database.getGenericMaxID(EMSDatabase.DISPATCH_EVENT_TABLE_NAME, "eventID"));
       log.setEventID(event.getEventID());
       
+      List<Long> availAmbulances = provider.getAvailAmbulances();
+      availAmbulances.remove(ambulance.getAmbulanceID());
+      List<Long> assignedAmbulances = provider.getAssignedAmbulances();
+      assignedAmbulances.add(ambulance.getAmbulanceID());
+      
+      provider.setAvailAmbulances(availAmbulances);
+      provider.setAssignedAmbulances(assignedAmbulances);
+      
       //Write data to database
       database.insertDispatchEventData(event);
       database.insertDispatchEventLogData(log);
+      database.updateEMSProviderData(provider);
 
       return new SimpleMessageData("Success", "The new Dispatch was successfully created");
     } catch (DatabaseOperationException doe) {
