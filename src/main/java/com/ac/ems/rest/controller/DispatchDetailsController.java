@@ -34,7 +34,7 @@ import com.ac.ems.rest.message.SimpleMessageData;
 @RequestMapping("/dispatch")
 public class DispatchDetailsController {
   
-  private final static SimpleDateFormat formatter = new SimpleDateFormat("dd MMM yy HH:mm:ss z");
+  private final static SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yy HH:mm:ss z");
   
   @RequestMapping(method = RequestMethod.GET, produces="application/json;charset=UTF-8")
   public Object getDispatchDetails(@RequestParam(value="id", defaultValue="-1") long dispatchID,
@@ -42,6 +42,8 @@ public class DispatchDetailsController {
                                    @RequestParam(value="result", defaultValue="full") String resultType) {
     if (!filterEvent.equalsIgnoreCase("yes") && !filterEvent.equalsIgnoreCase("no"))
       return new SimpleErrorData("Invalid Parameters", "The filterevent value was not valid.");
+    if (!resultType.equalsIgnoreCase("full") && !resultType.equalsIgnoreCase("table"))
+      return new SimpleErrorData("Invalid Parameters", "The result value was not valid.");
     
     //Create all the database stuff
     EMSDatabase database = null;
