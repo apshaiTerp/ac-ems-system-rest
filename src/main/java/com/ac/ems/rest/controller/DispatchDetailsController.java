@@ -1,6 +1,9 @@
 package com.ac.ems.rest.controller;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -9,13 +12,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ac.ems.data.DispatchDetails;
+import com.ac.ems.data.EMSProvider;
 import com.ac.ems.data.enums.SeverityLevel;
+import com.ac.ems.data.enums.SeverityLevelConverter;
 import com.ac.ems.db.EMSDatabase;
 import com.ac.ems.db.MongoDBFactory;
 import com.ac.ems.db.exception.ConfigurationException;
 import com.ac.ems.db.exception.DatabaseOperationException;
 import com.ac.ems.rest.Application;
 import com.ac.ems.rest.data.DispatchDetailSubmit;
+import com.ac.ems.rest.data.DispatchTableData;
+import com.ac.ems.rest.data.GenericListSuccessData;
 import com.ac.ems.rest.message.SimpleErrorData;
 import com.ac.ems.rest.message.SimpleMessageData;
 
@@ -27,9 +34,12 @@ import com.ac.ems.rest.message.SimpleMessageData;
 @RequestMapping("/dispatch")
 public class DispatchDetailsController {
   
+  private final static SimpleDateFormat formatter = new SimpleDateFormat("dd MMM yy HH:mm:ss z");
+  
   @RequestMapping(method = RequestMethod.GET, produces="application/json;charset=UTF-8")
   public Object getDispatchDetails(@RequestParam(value="id", defaultValue="-1") long dispatchID,
-                                   @RequestParam(value="filterevent", defaultValue="yes") String filterEvent) {
+                                   @RequestParam(value="filterevent", defaultValue="yes") String filterEvent,
+                                   @RequestParam(value="result", defaultValue="full") String resultType) {
     if (!filterEvent.equalsIgnoreCase("yes") && !filterEvent.equalsIgnoreCase("no"))
       return new SimpleErrorData("Invalid Parameters", "The filterevent value was not valid.");
     
@@ -49,7 +59,28 @@ public class DispatchDetailsController {
         if (result == null)
           return new SimpleErrorData("No Results Found", "No Results Found");
       } else {
-        result = database.getDispatchDetails(filterEvent.equalsIgnoreCase("yes"));
+        if (resultType.equalsIgnoreCase("full"))
+          result = database.getDispatchDetails(filterEvent.equalsIgnoreCase("yes"));
+        else {
+          List<DispatchDetails> curResults = database.getDispatchDetails(filterEvent.equalsIgnoreCase("yes"));
+          List<DispatchTableData> tableResults = new ArrayList<DispatchTableData>(curResults.size());
+          
+          for (DispatchDetails dispatch : curResults) {
+            EMSProvider provider = (EMSProvider)database.querySingleRow(EMSDatabase.EMS_PROVIDER_TABLE_NAME, "providerID", dispatch.getProviderID());
+            DispatchTableData data = new DispatchTableData();
+            
+            data.setDispatchID(dispatch.getDispatchID());
+            data.setPatientAddress(dispatch.getPatientAddress());
+            data.setSeverityLevel(SeverityLevelConverter.convertSeverityToString(dispatch.getReportedSeverity()));
+            data.setProviderName(provider.getProviderName());
+            data.setDispatchDate(formatter.format(dispatch.getDispatchReceivedDate()));
+            tableResults.add(data);
+          }
+          
+          GenericListSuccessData success = new GenericListSuccessData();
+          success.setResultList(tableResults);
+          result = success;
+        }
       }
 
       return result;
