@@ -1,5 +1,7 @@
 package com.ac.ems.rest.controller;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,12 +18,14 @@ import com.ac.ems.data.DispatchEvent;
 import com.ac.ems.data.DispatchEventLog;
 import com.ac.ems.data.EMSProvider;
 import com.ac.ems.data.enums.EventState;
+import com.ac.ems.data.enums.SeverityLevelConverter;
 import com.ac.ems.db.EMSDatabase;
 import com.ac.ems.db.MongoDBFactory;
 import com.ac.ems.db.exception.ConfigurationException;
 import com.ac.ems.db.exception.DatabaseOperationException;
 import com.ac.ems.rest.Application;
 import com.ac.ems.rest.data.DispatchAmbulanceData;
+import com.ac.ems.rest.data.DispatchTableData;
 import com.ac.ems.rest.data.GenericListSuccessData;
 import com.ac.ems.rest.message.SimpleErrorData;
 import com.ac.ems.rest.message.SimpleMessageData;
@@ -34,10 +38,15 @@ import com.ac.ems.rest.message.SimpleMessageData;
 @RequestMapping("/provider/dispatch")
 public class ProviderDispatchController {
 
+  private final static SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yy HH:mm:ss z");
+  
   @RequestMapping(method = RequestMethod.GET, produces="application/json;charset=UTF-8")
-  public Object getEMSProvider(@RequestParam(value="id") long providerID) {
+  public Object getEMSProvider(@RequestParam(value="id") long providerID,
+                               @RequestParam(value="result", defaultValue="full") String resultType) {
     if (providerID < 0)
       return new SimpleErrorData("Invalid Parameters", "An invalid providerID was provided");
+    if (!resultType.equalsIgnoreCase("full") && !resultType.equalsIgnoreCase("table"))
+      return new SimpleErrorData("Invalid Parameters", "The result value was not valid.");
 
     //Create all the database stuff
     EMSDatabase database = null;
@@ -60,10 +69,28 @@ public class ProviderDispatchController {
           filterResults.add(detail);
       }
       
-      GenericListSuccessData data = new GenericListSuccessData();
-      data.setResultList(filterResults);
+      GenericListSuccessData success = new GenericListSuccessData();
+      if (resultType.equalsIgnoreCase("table")) {
+        List<DispatchTableData> tableResults = new ArrayList<DispatchTableData>(filterResults.size());
+        for (DispatchDetails detail : filterResults) {
+          DispatchTableData data = new DispatchTableData();
+          
+          data.setDispatchID(detail.getDispatchID());
+          data.setPatientAddress(detail.getPatientAddress());
+          data.setSeverityLevel(SeverityLevelConverter.convertSeverityToString(detail.getReportedSeverity()));
+          data.setDispatchDate(formatter.format(detail.getDispatchReceivedDate()));
+
+          if (detail.getPatientGender().equalsIgnoreCase("Unknown") && detail.getPatientAgeRange().equalsIgnoreCase("Unknown"))
+            data.setProviderName("Unknown");
+          else data.setProviderName(detail.getPatientGender() + " " + detail.getPatientAgeRange());
+          tableResults.add(data);
+        }
+        success.setResultList(tableResults);
+      } else {
+        success.setResultList(filterResults);
+      }
       
-      return data;
+      return success;
     } catch (DatabaseOperationException doe) {
       doe.printStackTrace();
       return new SimpleErrorData("Database Operation Error", "An error occurred running the request: " + doe.getMessage());
