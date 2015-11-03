@@ -95,10 +95,10 @@ public class DispatchDetailsController {
     if ((!detail.getPatientGender().equalsIgnoreCase("unknown")) && (!detail.getPatientGender().equalsIgnoreCase("male")) &&
         (!detail.getPatientGender().equalsIgnoreCase("female")))
       return new SimpleErrorData("Request Error", "The provided patient gender was not valid");
-    if ((!detail.getPatientAgeRange().equalsIgnoreCase("Unknown")) && (!detail.getPatientAgeRange().equalsIgnoreCase("Non-Critical Injuries")) &&
-        (!detail.getPatientAgeRange().equalsIgnoreCase("Minor Trauma")) && (!detail.getPatientAgeRange().equalsIgnoreCase("Severe Trauma")) &&
-        (!detail.getPatientAgeRange().equalsIgnoreCase("Severe Burns")) && (!detail.getPatientAgeRange().equalsIgnoreCase("STEMI")) &&
-        (!detail.getPatientAgeRange().equalsIgnoreCase("Stroke")))
+    if ((!detail.getReportedSeverity().equalsIgnoreCase("Unknown")) && (!detail.getReportedSeverity().equalsIgnoreCase("Non-Critical Injuries")) &&
+        (!detail.getReportedSeverity().equalsIgnoreCase("Minor Trauma")) && (!detail.getReportedSeverity().equalsIgnoreCase("Severe Trauma")) &&
+        (!detail.getReportedSeverity().equalsIgnoreCase("Severe Burns")) && (!detail.getReportedSeverity().equalsIgnoreCase("STEMI")) &&
+        (!detail.getReportedSeverity().equalsIgnoreCase("Stroke")))
       return new SimpleErrorData("Request Error", "The provided severity level was not valid");
     
     //Before we commit this record, we need to convert it into the proper DispatchDetails object
