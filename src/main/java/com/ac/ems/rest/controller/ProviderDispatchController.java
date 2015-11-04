@@ -18,6 +18,7 @@ import com.ac.ems.data.DispatchEvent;
 import com.ac.ems.data.DispatchEventLog;
 import com.ac.ems.data.EMSProvider;
 import com.ac.ems.data.enums.EventState;
+import com.ac.ems.data.enums.SeverityLevel;
 import com.ac.ems.data.enums.SeverityLevelConverter;
 import com.ac.ems.db.EMSDatabase;
 import com.ac.ems.db.MongoDBFactory;
@@ -27,6 +28,7 @@ import com.ac.ems.rest.Application;
 import com.ac.ems.rest.data.DispatchAmbulanceData;
 import com.ac.ems.rest.data.DispatchTableData;
 import com.ac.ems.rest.data.GenericListSuccessData;
+import com.ac.ems.rest.data.HospitalRouteData;
 import com.ac.ems.rest.message.SimpleErrorData;
 import com.ac.ems.rest.message.SimpleMessageData;
 
@@ -145,10 +147,6 @@ public class ProviderDispatchController {
       log.setChangedOnDate(new Date());
       log.setChangedByUserID(data.getUserID());
       
-      //Generate the new ID value
-      event.setEventID(database.getGenericMaxID(EMSDatabase.DISPATCH_EVENT_TABLE_NAME, "eventID") + 1);
-      log.setEventID(event.getEventID());
-      
       List<Long> availAmbulances = provider.getAvailAmbulances();
       availAmbulances.remove(ambulance.getAmbulanceID());
       List<Long> assignedAmbulances = provider.getAssignedAmbulances();
@@ -156,6 +154,41 @@ public class ProviderDispatchController {
       
       provider.setAvailAmbulances(availAmbulances);
       provider.setAssignedAmbulances(assignedAmbulances);
+      
+      if ((!detail.getPatientAgeRange().equalsIgnoreCase("Unknown")) && (detail.getReportedSeverity() != null) && 
+          (detail.getReportedSeverity() != SeverityLevel.UNKNOWN)) {
+        //We need to convert the SeverityLevel back into a form the algorithm expects:
+        String newCondition = null;
+        switch (detail.getReportedSeverity()) {
+          case NONCRITICAL    : newCondition = "basicER"; break;
+          case PEDNONCRITICAL : newCondition = "basicER"; break;
+          case BURN           : newCondition = "burn"; break;
+          case PEDBURN        : newCondition = "burn"; break;
+          case MINORTRAUMA    : newCondition = "minor"; break;
+          case SEVERETRAUMA   : newCondition = "severe"; break;
+          case PEDTRAUMA      : newCondition = "severe"; break;
+          case STEMI          : newCondition = "stemi"; break;
+          case STROKE         : newCondition = "stroke"; break;
+          case UNKNOWN        : break;
+          default             : break;
+        }
+        
+        if (newCondition != null) {
+          NearestHospitalController controller = new NearestHospitalController();
+          Object nearestResult = controller.getShortestPath(detail.getIncidentLat(), detail.getIncidentLon(), detail.getPatientAgeRange(), newCondition, "");
+          if ((nearestResult != null) && (!(nearestResult instanceof SimpleErrorData))) {
+            @SuppressWarnings("unchecked")
+            List<HospitalRouteData> routes = (List<HospitalRouteData>)nearestResult;
+            if (routes.size() > 0) {
+              event.setRecommendedHospitalID(routes.get(0).getHospitalID());
+            }
+          }
+        }
+      }
+      
+      //Generate the new ID value
+      event.setEventID(database.getGenericMaxID(EMSDatabase.DISPATCH_EVENT_TABLE_NAME, "eventID") + 1);
+      log.setEventID(event.getEventID());
       
       //Write data to database
       database.insertDispatchEventData(event);
