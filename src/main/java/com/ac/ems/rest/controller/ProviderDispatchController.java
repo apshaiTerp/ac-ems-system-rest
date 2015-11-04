@@ -146,7 +146,7 @@ public class ProviderDispatchController {
       log.setChangedByUserID(data.getUserID());
       
       //Generate the new ID value
-      event.setEventID(database.getGenericMaxID(EMSDatabase.DISPATCH_EVENT_TABLE_NAME, "eventID"));
+      event.setEventID(database.getGenericMaxID(EMSDatabase.DISPATCH_EVENT_TABLE_NAME, "eventID") + 1);
       log.setEventID(event.getEventID());
       
       List<Long> availAmbulances = provider.getAvailAmbulances();
