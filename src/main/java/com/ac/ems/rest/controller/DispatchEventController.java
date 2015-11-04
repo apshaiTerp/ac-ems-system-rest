@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ac.ems.data.DispatchDetails;
 import com.ac.ems.data.DispatchEvent;
 import com.ac.ems.data.EMSProvider;
+import com.ac.ems.data.Hospital;
 import com.ac.ems.data.enums.SeverityLevelConverter;
 import com.ac.ems.db.EMSDatabase;
 import com.ac.ems.db.MongoDBFactory;
@@ -87,6 +88,29 @@ public class DispatchEventController {
               DispatchDetails detail = (DispatchDetails)database.querySingleRow(EMSDatabase.DISPATCH_DETAILS_TABLE_NAME, "dispatchID", event.getDispatchID());
               data.setPatientSeverity(SeverityLevelConverter.convertSeverityToString(detail.getReportedSeverity()));
             } else data.setPatientSeverity(SeverityLevelConverter.convertSeverityToString(event.getObservedSeverity()));
+            
+            if (event.getTargetHospitalID() == -1) {
+              if (event.getRecommendedHospitalID() == -1)
+                data.setDestinationHospital("Not Yet Determined");
+              else {
+                Hospital hospital = (Hospital)database.querySingleRow(EMSDatabase.HOSPITAL_TABLE_NAME, "hospitalID", event.getRecommendedHospitalID());
+                if (hospital == null)
+                  data.setDestinationHospital("Not Yet Determined");
+                else data.setDestinationHospital(hospital.getHospitalName());
+              }
+            } else {
+              Hospital hospital = (Hospital)database.querySingleRow(EMSDatabase.HOSPITAL_TABLE_NAME, "hospitalID", event.getTargetHospitalID());
+              if (hospital == null) {
+                if (event.getRecommendedHospitalID() == -1)
+                  data.setDestinationHospital("Not Yet Determined");
+                else {
+                  Hospital hospital2 = (Hospital)database.querySingleRow(EMSDatabase.HOSPITAL_TABLE_NAME, "hospitalID", event.getRecommendedHospitalID());
+                  if (hospital2 == null)
+                    data.setDestinationHospital("Not Yet Determined");
+                  else data.setDestinationHospital(hospital2.getHospitalName());
+                }
+              } else data.setDestinationHospital(hospital.getHospitalName());
+            }
             
             tableResults.add(data);
           }
