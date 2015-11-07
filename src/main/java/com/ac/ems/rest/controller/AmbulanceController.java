@@ -24,7 +24,7 @@ import com.ac.ems.rest.message.SimpleMessageData;
  *
  */
 @RestController
-@RequestMapping("/event")
+@RequestMapping("/ambulance")
 public class AmbulanceController {
 
   @RequestMapping(method = RequestMethod.GET, produces="application/json;charset=UTF-8")
