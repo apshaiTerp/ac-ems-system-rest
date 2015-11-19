@@ -34,6 +34,8 @@ public class DispatchDetailSubmit {
   private double incidentLat;
   /** Need to store this somewhere */
   private double incidentLon;
+  /** Need to store the phone number for later use */
+  private String contactPhone;
   
   public DispatchDetailSubmit() {
     patientName          = null;
@@ -47,6 +49,7 @@ public class DispatchDetailSubmit {
     providerID           = -1L;
     incidentLat          = 0.0;
     incidentLon          = 0.0;
+    contactPhone         = null;
   }
 
   /**
@@ -70,6 +73,7 @@ public class DispatchDetailSubmit {
       providerID           = jsonData.providerID;
       incidentLat          = jsonData.incidentLat;
       incidentLon          = jsonData.incidentLon;
+      contactPhone         = jsonData.contactPhone;
     } catch (JsonParseException jpe) {
       jpe.printStackTrace();
     } catch (JsonMappingException jme) {
@@ -231,5 +235,19 @@ public class DispatchDetailSubmit {
    */
   public void setIncidentLon(double incidentLon) {
     this.incidentLon = incidentLon;
+  }
+
+  /**
+   * @return the contactPhone
+   */
+  public String getContactPhone() {
+    return contactPhone;
+  }
+
+  /**
+   * @param contactPhone the contactPhone to set
+   */
+  public void setContactPhone(String contactPhone) {
+    this.contactPhone = contactPhone;
   }
 }

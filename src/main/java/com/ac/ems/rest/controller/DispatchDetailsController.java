@@ -121,6 +121,8 @@ public class DispatchDetailsController {
       return new SimpleErrorData("Request Error", "The provided incident latitude value was not valid");
     if (detail.getIncidentLon() == 0.0)
       return new SimpleErrorData("Request Error", "The provided incident longitude value was not valid");
+    if (detail.getContactPhone() == null)
+      return new SimpleErrorData("Request Error", "The provided contact phone was not valid");
     
     if ((!detail.getPatientAgeRange().equalsIgnoreCase("unknown")) && (!detail.getPatientAgeRange().equalsIgnoreCase("child")) &&
         (!detail.getPatientAgeRange().equalsIgnoreCase("teen")) && (!detail.getPatientAgeRange().equalsIgnoreCase("adult")))
@@ -148,6 +150,7 @@ public class DispatchDetailsController {
     newDispatch.setProviderID(detail.getProviderID());
     newDispatch.setIncidentLat(detail.getIncidentLat());
     newDispatch.setIncidentLon(detail.getIncidentLon());
+    newDispatch.setContactPhone(detail.getContactPhone());
     //Set to the current date
     newDispatch.setDispatchReceivedDate(new Date());
 

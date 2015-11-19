@@ -46,6 +46,8 @@
         <rest-assured.version>2.4.0</rest-assured.version>
         <json.version>20140107</json.version>
         
+        <twilio.version>3.4.5</twilio.version>
+        
         <!--  Plugin Versions  -->
         <clover.version>3.3.0</clover.version>
         <reports.plugin.version>2.7</reports.plugin.version>
@@ -92,6 +94,11 @@
           <groupId>org.json</groupId>
           <artifactId>json</artifactId>
           <version>${json.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>com.twilio.sdk</groupId>
+          <artifactId>twilio-java-sdk</artifactId>
+          <version>${twilio.version}</version>
         </dependency>
         <!-- Test Dependencies -->
         <dependency>

@@ -54,6 +54,8 @@ public class AmbulanceDispatchData extends SimpleMessageData {
   private double incidentLat;
   /** Need to store this somewhere */
   private double incidentLon;
+  /** The contact phone number */
+  private String contactPhone;
 
   //Potential Additional details from Hospital data
   /** Text name for the recommended Hospital, if one exists */
@@ -82,6 +84,7 @@ public class AmbulanceDispatchData extends SimpleMessageData {
     reportedByName          = null;
     incidentLat             = 0.0;
     incidentLon             = 0.0;
+    contactPhone            = null;
     
     recommendedHospitalName = null;
     targetHospitalName      = null;
@@ -109,6 +112,7 @@ public class AmbulanceDispatchData extends SimpleMessageData {
     reportedByName          = detail.getReportedByName();
     incidentLat             = detail.getIncidentLat();
     incidentLon             = detail.getIncidentLon();
+    contactPhone            = detail.getContactPhone();
   }
 
   /**
@@ -389,5 +393,19 @@ public class AmbulanceDispatchData extends SimpleMessageData {
    */
   public void setTargetHospitalName(String targetHospitalName) {
     this.targetHospitalName = targetHospitalName;
+  }
+
+  /**
+   * @return the contactPhone
+   */
+  public String getContactPhone() {
+    return contactPhone;
+  }
+
+  /**
+   * @param contactPhone the contactPhone to set
+   */
+  public void setContactPhone(String contactPhone) {
+    this.contactPhone = contactPhone;
   }
 }
